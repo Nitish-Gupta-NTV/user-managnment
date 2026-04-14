@@ -65,13 +65,21 @@ export default function PreviewPage() {
           </ul>
         </div>
 
-       <button
-  onClick={saveUser}
+       <button 
+ disabled
   className="w-full mt-2 bg-green-500 text-white py-2 rounded-lg"
 >
-  Save User
+  Save Users
 </button>
       </div>
     </div>
   );
 }
+/*
+<button 
+  onClick={saveUser}
+  className="w-full mt-2 bg-green-500 text-white py-2 rounded-lg"
+>
+  Save User
+</button>
+ */
