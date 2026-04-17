@@ -5,7 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { userSchema, UserFormValues } from "../lib/validationSchema";
 import InputField from "./InputField";
-import SkillsField from "./Skillsfield";
+import SkillsField from "./SkillsField";
+import { useEffect } from "react";
 
 export default function UserForm() {
   const router = useRouter();
@@ -27,10 +28,14 @@ export default function UserForm() {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  /*const { fields, append, remove } = useFieldArray({
     control,
     name: "skills" as never,
-  });
+  });*/
+  const { fields, append, remove } = useFieldArray({
+  control,
+  name: "skills",            
+});
 
  /* const onSubmit = (data: UserFormValues) => {
     localStorage.setItem("userData", JSON.stringify(data));
@@ -44,7 +49,6 @@ export default function UserForm() {
   localStorage.setItem("userData", JSON.stringify(payload));
   router.push("/preview");
 };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="bg-white rounded-2xl shadow-md w-full max-w-md p-8">

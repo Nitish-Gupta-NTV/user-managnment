@@ -68,7 +68,8 @@ export default function SkillsField({
 
       <button
         type="button"
-        onClick={() => append("")}
+        //onClick={() => append("")}
+        onClick={() => append({ value: "" })}
         className="mt-3 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
       >
         + Add Skill
