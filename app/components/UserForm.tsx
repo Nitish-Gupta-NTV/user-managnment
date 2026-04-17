@@ -1,68 +1,115 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import { userSchema } from "../lib/validationSchema";
+import { useRouter } from "next/navigation";
+import { userSchema, UserFormValues } from "../lib/validationSchema";
 import InputField from "./InputField";
-import SkillsField from "./SkillsField";
+import SkillsField from "./Skillsfield";
 
 export default function UserForm() {
   const router = useRouter();
 
   const {
     register,
-    control,
     handleSubmit,
+    control,
     formState: { errors },
-  } = useForm<any>({
+  } = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: {
-      skills: [""],
+      name: "",
+      email: "",
+      password: "",
+      role: "",
+     // skills: [""],
+      skills: [{ value: "" }], 
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "skills",
+    name: "skills" as never,
   });
 
-  const onSubmit = (data: any) => {
-    router.push(`/preview?data=${encodeURIComponent(JSON.stringify(data))}`);
+ /* const onSubmit = (data: UserFormValues) => {
+    localStorage.setItem("userData", JSON.stringify(data));
+    router.push("/preview");
+  };*/
+  const onSubmit = (data: UserFormValues) => {
+  const payload = {
+    ...data,
+    skills: data.skills.map((s) => s.value),  // ← back to string[]
   };
+  localStorage.setItem("userData", JSON.stringify(payload));
+  router.push("/preview");
+};
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg space-y-4"
-      >
-        <h2 className="text-2xl font-bold text-center text-blue-600">
-          User Management
-        </h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="bg-white rounded-2xl shadow-md w-full max-w-md p-8">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          Create User
+        </h1>
 
-        <InputField label="Full Name" name="name" register={register} error={errors.name} />
-        <InputField label="Email" name="email" register={register} error={errors.email} />
-        <InputField label="Password" name="password" type="password" register={register} error={errors.password} />
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <InputField
+            label="Full Name"
+            name="name"
+            register={register}
+            error={errors.name}
+          />
 
-        <select {...register("role")} className="w-full p-3 border rounded-lg">
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
+          <InputField
+            label="Email"
+            name="email"
+            type="email"
+            register={register}
+            error={errors.email}
+          />
 
-        <SkillsField
-          fields={fields}
-          append={append}
-          remove={remove}
-          register={register}
-          errors={errors}
-        />
+          <InputField
+            label="Password"
+            name="password"
+            type="password"
+            register={register}
+            error={errors.password}
+          />
 
-        <button className="w-full bg-blue-500 text-white py-3 rounded-lg">
-          Preview User
-        </button>
-      </form>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Role
+            </label>
+            <select
+              {...register("role")}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            >
+              <option value="">Select a role</option>
+              <option value="admin">Admin</option>
+              <option value="user">User</option>
+              <option value="editor">Editor</option>
+            </select>
+            {errors.role && (
+              <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>
+            )}
+          </div>
+
+          <SkillsField
+            fields={fields}
+            append={append}
+            remove={remove}
+            register={register}
+            errors={errors}
+          />
+
+          <button
+            type="submit"
+            className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
+          >
+            Preview →
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

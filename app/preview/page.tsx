@@ -1,6 +1,7 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type User = {
   name: string;
@@ -8,78 +9,80 @@ type User = {
   password: string;
   role: string;
   skills: string[];
+ 
 };
 
-
 export default function PreviewPage() {
-  const searchParams = useSearchParams();
-  const data = searchParams.get("data");
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
-  let user: User | null = null;
-
-  try {
+  useEffect(() => {
+    const data = localStorage.getItem("userData");
     if (data) {
-      user = JSON.parse(decodeURIComponent(data));
+      setUser(JSON.parse(data));
+    } else {
+      router.push("/");
     }
-  } catch (error) {
-    console.error("Invalid data format");
-  }
+  }, [router]);
+
+  const handleConfirm = () => {
+    localStorage.removeItem("userData");
+    alert("User saved successfully!");
+    router.push("/");
+  };
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-red-500">No valid user data found ❌</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500">Loading...</p>
       </div>
     );
   }
-  const saveUser = async () => {
-  const res = await fetch("/api/save-user", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(user),
-  });
-
-  const data = await res.json();
-  alert(data.message);
-};
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md space-y-3">
-        <h2 className="text-xl font-bold text-center text-blue-600">
-          User Preview
+    <div className="min-h-screen flex justify-center items-center bg-gray-50 px-4">
+      <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+          Preview User
         </h2>
 
-        <p><strong>Name:</strong> {user.name}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Role:</strong> {user.role}</p>
-
-        <div>
-          <strong>Skills:</strong>
-          <ul className="list-disc ml-5 mt-1">
-            {user.skills.map((skill, index) => (
-              <li key={index}>{skill}</li>
-            ))}
-          </ul>
+        <div className="space-y-3 mb-6">
+          <div className="flex justify-between border-b border-gray-100 pb-2">
+            <span className="text-sm font-medium text-gray-500">Name</span>
+            <span className="text-sm text-gray-800">{user.name}</span>
+          </div>
+          <div className="flex justify-between border-b border-gray-100 pb-2">
+            <span className="text-sm font-medium text-gray-500">Email</span>
+            <span className="text-sm text-gray-800">{user.email}</span>
+          </div>
+          <div className="flex justify-between border-b border-gray-100 pb-2">
+            <span className="text-sm font-medium text-gray-500">Role</span>
+            <span className="text-sm text-gray-800 capitalize">{user.role}</span>
+          </div>
+          <div className="flex justify-between border-b border-gray-100 pb-2">
+            <span className="text-sm font-medium text-gray-500">Skills</span>
+            <span className="text-sm text-gray-800 text-right max-w-[60%]">
+              {user.skills?.join(", ")}
+            </span>
+          </div>
         </div>
 
-       <button 
- disabled
-  className="w-full mt-2 bg-green-500 text-white py-2 rounded-lg"
->
-  Save Users
-</button>
+        <div className="space-y-2">
+          <button
+            onClick={() => router.push("/")}
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2.5 rounded-lg transition-colors"
+          >
+            Edit
+          </button>
+
+          <button
+            onClick={handleConfirm}
+            className="w-full py-2.5 rounded-lg text-white font-semibold bg-green-500 hover:bg-green-600 transition-colors"
+          >
+            Confirm & Submit
+          </button>
+        </div>
       </div>
     </div>
   );
 }
-/*
-<button 
-  onClick={saveUser}
-  className="w-full mt-2 bg-green-500 text-white py-2 rounded-lg"
->
-  Save User
-</button>
- */
